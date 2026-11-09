@@ -1,5 +1,5 @@
 local places = {
-    [5777099015] = {name = "Cheese Escape"},
+    [5777099015] = {name = "CheeseEscape"},
 }
 
 local currentPlaceId = game.PlaceId
