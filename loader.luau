@@ -5,7 +5,13 @@ local places = {
 local currentPlaceId = game.PlaceId
 
 if places[currentPlaceId] then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/smthneededyk/unevyy/refs/heads/main/games/" .. places[currentPlaceId].name .. ".luau"))()
+    local path = places[currentPlaceId].name
+    local url = "https://raw.githubusercontent.com/smthneededyk/unevyy/refs/heads/main/games/" .. path .. ".luau"
+    
+    local ok, err = pcall(function()
+        loadstring(game:HttpGet(url, true))()
+    end)
+    if not ok then warn("Error:", err) end
 else
     warn("Universal is not supported")
 end
