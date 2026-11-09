@@ -7,6 +7,7 @@ local mazerandom = nil
 local Lighting = game:GetService("Lighting")
 local player = game:GetService("Players").LocalPlayer
 
+-- functions?
 
 local getkeyschapter1 = function()
     local colors = {
@@ -84,6 +85,116 @@ local getitemschapter2 = function()
     end
 end
 
+local groupColors = {
+    keys  = Color3.fromRGB(255, 255, 0),
+    items = Color3.fromRGB(255, 0, 0),
+}
+
+local function tagItem(part, labelText, group)
+    local old = part:FindFirstChild("ItemTag")
+    if old then old:Destroy() end
+
+    local color = groupColors[group] or Color3.fromRGB(255, 255, 0)
+
+    local hl = Instance.new("Highlight")
+    hl.Name = "ItemTag"
+    hl:SetAttribute("Group", group)
+    hl.FillColor = color
+    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+    hl.FillTransparency = 0.5
+    hl.OutlineTransparency = 0
+    hl.Adornee = part
+    hl.Enabled = false
+    hl.Parent = part
+
+    local bb = Instance.new("BillboardGui")
+    bb.Name = "ItemTag"
+    bb:SetAttribute("Group", group)
+    bb.Size = UDim2.new(0, 100, 0, 30)
+    bb.MaxDistance = 500
+    bb.StudsOffset = Vector3.new(0, part.Size.Y / 2 + 1, 0)
+    bb.AlwaysOnTop = true
+    bb.Adornee = part
+    bb.Enabled = false
+    bb.Parent = part
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, 0, 1, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = labelText
+    lbl.TextColor3 = color
+    lbl.TextStrokeTransparency = 0
+    lbl.TextScaled = true
+    lbl.Font = Enum.Font.GothamBold
+    lbl.Parent = bb
+end
+
+local function setGroupColor(group, color)
+    groupColors[group] = color
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj.Name == "ItemTag" and obj:GetAttribute("Group") == group then
+            if obj:IsA("Highlight") then
+                obj.FillColor = color
+            elseif obj:IsA("BillboardGui") then
+                local lbl = obj:FindFirstChildOfClass("TextLabel")
+                if lbl then lbl.TextColor3 = color end
+            end
+        end
+    end
+end
+
+local function setGroupEnabled(group, enabled)
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj.Name == "ItemTag" and obj:GetAttribute("Group") == group then
+            obj.Enabled = enabled
+        end
+    end
+end
+
+local function highlightByColor(r, g, b, labelText, requireWorkspaceParent, group)
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj.Name == "Handle" and (obj:IsA("Part") or obj:IsA("UnionOperation")) then
+            local c = obj.Color
+            if math.floor(c.R*255+0.5) == r and math.floor(c.G*255+0.5) == g and math.floor(c.B*255+0.5) == b then
+                if requireWorkspaceParent and obj.Parent ~= workspace then continue end
+                tagItem(obj, labelText, group)
+            end
+        end
+    end
+end
+
+local function highlightGreyKey(group)
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") then
+            local h = obj:FindFirstChild("Handle")
+            if h and (h:IsA("Part") or h:IsA("UnionOperation")) then
+                local c = h.Color
+                if math.floor(c.R*255+0.5) == 159 and math.floor(c.G*255+0.5) == 161 and math.floor(c.B*255+0.5) == 172 then
+                    tagItem(h, "Grey Key", group)
+                end
+            end
+        end
+    end
+end
+
+local function highlightKeys(group)
+    highlightByColor(248, 248, 248, "White Key",  nil,  group)
+    highlightByColor(255, 0,   0,   "Red Key",    nil,  group)
+    highlightByColor(170, 0,   170, "Purple Key", nil,  group)
+    highlightByColor(255, 255, 0,   "Yellow Key", nil,  group)
+    highlightByColor(0,   255, 0,   "Green Key",  nil,  group)
+    highlightByColor(16,  42,  220, "Blue Key",   nil,  group)
+    highlightGreyKey(group)
+end
+
+local function highlightItems(group)
+    highlightByColor(205, 205, 205, "Bloxy Cola",  nil,  group)
+    highlightByColor(159, 161, 172, "Wood Plank",  true, group)
+    highlightByColor(196, 40,  28,  "Red Cheese",  nil,  group)
+end
+
+-- now script timeeeee
+
 local noFogToggle = Instance.new("BoolValue")
 noFogToggle.Name = "NoFog"
 noFogToggle.Parent = Lighting
@@ -150,7 +261,7 @@ local speedValue = 21
 local jumpValue = 30
 
 local speedSlider = MainLeft:AddSlider("SpeedBoost", {
-    Text = "Speed Boost", Min = 0, Max = 100, Default = 21, Rounding = 0, Compact = true
+    Text = "Speed Boost", Min = 0, Max = 100, Default = 50, Rounding = 0, Compact = true
 })
 
 local enablews = MainLeft:AddToggle("EnableWS", {
@@ -166,7 +277,7 @@ enablews:AddKeyPicker("EnableWSKey", {
 })
 
 local jumpSlider = MainLeft:AddSlider("JumpBoost", {
-    Text = "Jump Boost", Min = 0, Max = 300, Default = 30, Rounding = 0, Compact = true
+    Text = "Jump Boost", Min = 0, Max = 300, Default = 37, Rounding = 0, Compact = true
 })
 
 local enablejp = MainLeft:AddToggle("EnableJP", {
@@ -431,6 +542,24 @@ ExploitsLeft:AddButton({
     end
 })
 
+local antijd = ExploitsLeft:AddToggle("AntiJumpDebounce", {
+    Text = "Anti Jump Debounce",
+    Default = false,
+    Tooltip = "Disables Jump Debounce, so that you can instantly jump back (useful for chapter 3)."
+})
+
+antijd:OnChanged(function(Value)
+    if game:GetService("Players").LocalPlayer.Character then
+        if game:GetService("Players").LocalPlayer.Character.JumpDebouncer then
+            game:GetService("Players").LocalPlayer.Character.JumpDebouncer.Disabled = Value
+        else
+            Library:Notify("Jump Debouncer Is already gone.", 5)
+        end
+    else
+        Library:Notify("Wait until you respawn or smth.", 3)
+    end
+end)
+
 ExploitsRight:AddButton({
     Text = "Get All Cheese [FE]",
     DoubleClick = false,
@@ -566,6 +695,48 @@ local espmouse = VisualsESP:AddToggle("MouseESP", {
     Callback = function(state)
         if highlight then highlight.Enabled = state end
         if billboard then billboard.Enabled = state end
+    end
+})
+
+local espkeys = VisualsESP:AddToggle("KeysESP", {
+    Text = "Highlight Keys",
+    Default = false,
+    Callback = function(state)
+        if state then
+            highlightKeys("keys")
+            setGroupEnabled("keys", true)
+        else
+            setGroupEnabled("keys", false)
+        end
+    end
+})
+
+local espitems = VisualsESP:AddToggle("ItemsESP", {
+    Text = "Highlight Items",
+    Default = false,
+    Callback = function(state)
+        if state then
+            highlightKeys("items")
+            highlightItems("items")
+            setGroupEnabled("items", true)
+        else
+            setGroupEnabled("items", false)
+        end
+    end
+})
+
+espitems:AddColorPicker("ItemsColor", {
+    Default = Color3.fromRGB(255, 255, 0),
+    Callback = function(color)
+        setGroupColor("items", color)
+    end
+})
+
+
+espkeys:AddColorPicker("KeysColor", {
+    Default = Color3.fromRGB(255, 255, 0),
+    Callback = function(color)
+        setGroupColor("keys", color)
     end
 })
 
