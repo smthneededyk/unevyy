@@ -157,6 +157,14 @@ local enablews = MainLeft:AddToggle("EnableWS", {
     Text = "Enable Speed Boost", Default = false, Tooltip = "Enables Speed Boost."
 })
 
+enablews:AddKeyPicker("EnableWSKey", {
+    Default = "B",
+    Mode = "Toggle",
+    SyncToggleState = true,
+    Text = "Speed Boost",
+    NoUI = false
+})
+
 local jumpSlider = MainLeft:AddSlider("JumpBoost", {
     Text = "Jump Boost", Min = 0, Max = 300, Default = 30, Rounding = 0, Compact = true
 })
@@ -168,9 +176,9 @@ local enablejp = MainLeft:AddToggle("EnableJP", {
 local function update()
     local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
     if not hum then return end
-    hum.WalkSpeed = enablews.Value and speedValue or 16
+    hum.WalkSpeed = enablews.Value and speedValue or 20
     hum.UseJumpPower = true
-    hum.JumpPower = enablejp.Value and jumpValue or 50
+    hum.JumpPower = enablejp.Value and jumpValue or 37
 end
 
 speedSlider:OnChanged(function(v) speedValue = v; update() end)
