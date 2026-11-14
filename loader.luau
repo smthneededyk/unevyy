@@ -4,7 +4,7 @@ local places = {
     [16527670555] = {name = "CheeseEscape"}, -- chapter 3
     [8786790616] = {name = "CheeseEscape"}, -- boss fight
     [8786778788] = {name = "CheeseEscape"}, -- boss fight lobby
-    [100453542816833] = {name = "SayCheese"}, --say cheese ig?
+    [100453542816833] = {name = "SayCheese"}, -- say cheese ig?
 }
 
 local currentPlaceId = game.PlaceId
