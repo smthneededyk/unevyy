@@ -10,6 +10,9 @@ local places = {
     [73904017172892] = {name = "RollinACart"}, -- world 1
     [95434492276980] = {name = "RollinACart"}, -- world 2
     [108255263432726] = {name = "RollinACart"}, -- world 3
+
+    [8888615802] = {name = "RainbowFriends"}, -- chapter 1 game
+    [13622981808] = {name = "RainbowFriends"}, -- chapter 2 game
 }
 
 local currentPlaceId = game.PlaceId
