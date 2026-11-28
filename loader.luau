@@ -13,6 +13,8 @@ local places = {
 
     [8888615802] = {name = "RainbowFriends"}, -- chapter 1 game
     [13622981808] = {name = "RainbowFriends"}, -- chapter 2 game
+    
+    [142823291] = {name = "MurderMystery2"}, -- mm2 standard
 }
 
 local currentPlaceId = game.PlaceId
